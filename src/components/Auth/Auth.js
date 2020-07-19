@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { getHash, ACCESS_TOKEN_STORAGE_KEY } from '../../utils';
+import { tokenService } from '../../services';
+import { getHash } from '../../utils';
 
 const SPOTIFY_CONFIG = {
   clientId: '11bc7dba81f34591a3a740f64072cdf1',
@@ -7,20 +8,15 @@ const SPOTIFY_CONFIG = {
   scopes: ['user-read-email', 'user-read-private']
 }
 
-const accessToken = getHash().access_token;
-
-if (accessToken) {
-    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, accessToken);
-}
-
 export const AuthContext = React.createContext({});
 
 const Auth = ({ children }) => {
-  
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY));
+  tokenService.setToken(getHash());
+
+  const [isAuthenticated, setIsAuthenticated] = useState(!!tokenService.getAccessToken());
 
   useEffect(() => {
-    const isAuthenticated = !!localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    const isAuthenticated = !!tokenService.getAccessToken();
     setIsAuthenticated(isAuthenticated);
   }, []);
 
@@ -33,7 +29,7 @@ const Auth = ({ children }) => {
   }
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
+    tokenService.clearToken();
     setIsAuthenticated(false);
   }
 
